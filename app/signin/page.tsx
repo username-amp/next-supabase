@@ -12,6 +12,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import { signin } from "@/actions/auth/actions";
 
 export default async function SignInPage() {
   const supabase = createClient();
@@ -48,7 +49,9 @@ export default async function SignInPage() {
               <Label htmlFor="password">Password</Label>
               <Input id="password" name="password" required type="password" />
             </div>
-            <Button className="w-full">Sign in</Button>
+            <Button formAction={signin} className="w-full">
+              Sign in
+            </Button>
           </form>
           <Separator />
           <div className="space-y-4">
