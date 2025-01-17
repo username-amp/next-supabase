@@ -2,33 +2,31 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 export function createClient() {
-  const cookieStore = cookies();
+  const cookieStore = cookies(); // Retrieves the cookies object for this request.
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
+        async get(name: string) {
+          const cookie = (await cookieStore).get(name); // `get` is available directly.
+          return cookie?.value;
         },
 
-        set(name: string, value: string, options: CookieOptions) {
+        async set(name: string, value: string, options: CookieOptions) {
           try {
-            cookieStore.set({ name, value, ...options });
+            (await cookies()).set(name, value, options); // `set` needs to be called directly.
           } catch (error) {
-            // The `set` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
+            console.warn("Failed to set cookie:", error);
           }
         },
-        remove(name: string, options: CookieOptions) {
+
+        async remove(name: string, options: CookieOptions) {
           try {
-            cookieStore.set({ name, value: "", ...options });
+            (await cookies()).set(name, "", { ...options, maxAge: -1 }); // `maxAge: -1` removes the cookie.
           } catch (error) {
-            // The `delete` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
+            console.warn("Failed to remove cookie:", error);
           }
         },
       },
